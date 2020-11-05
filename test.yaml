@@ -1,0 +1,35 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+  fluentforward:
+    endpoint: "0.0.0.0:12345"
+
+exporters:
+  logging:
+    logLevel: debug
+  elasticsearch:
+    hosts: ["http://localhost:9200"]
+    user: elastic
+    password: changeme
+    index: logs-otel-test
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
+
+    logs:
+      receivers: [otlp, fluentforward]
+      exporters: [logging, elasticsearch]
