@@ -18,6 +18,7 @@ type elasticsearchExporter struct {
 	maxRetries int
 	index      string
 	pipeline   string
+	mapping    map[string]string
 
 	logger *zap.Logger
 
@@ -42,6 +43,8 @@ func newExporter(config Config, params component.ExporterCreateParams) (*elastic
 		logger:     params.Logger,
 		maxRetries: config.ClientSettings.Retries,
 		index:      config.BulkSettings.Index,
+		// TODO: add setting to disable ECS auto-mapping
+		mapping: ecsConventionsMapping,
 
 		client:      client,
 		bulkIndexer: bulkIndexer,
@@ -83,7 +86,7 @@ func (e *elasticsearchExporter) pushLogsData(ctx context.Context, ld pdata.Logs)
 				}
 
 				var event []byte
-				event, err := encodeLogEvent(lr)
+				event, err := encodeLogEvent(lr, e.mapping)
 				if err != nil {
 					e.logger.Error("Failed to encode log record.", zap.NamedError("reason", err))
 					dropped++
