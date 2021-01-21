@@ -7,8 +7,8 @@ receivers:
     endpoint: "0.0.0.0:12345"
 
 exporters:
-  logging:
-    logLevel: debug
+  # logging:
+  #   logLevel: debug
   elasticsearch:
     hosts: ["http://localhost:9200"]
     user: elastic
@@ -20,16 +20,18 @@ processors:
 
 service:
   pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+    # traces:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [logging]
 
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [logging]
+    # metrics:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [logging]
 
     logs:
       receivers: [otlp, fluentforward]
-      exporters: [logging, elasticsearch]
+      #exporters: [logging, elasticsearch]
+      exporters: [elasticsearch]
+      #exporters: [logging]

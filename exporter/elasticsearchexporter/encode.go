@@ -46,7 +46,7 @@ func mapFieldKeys(obj *object, mapping map[string]string) {
 }
 
 func addOptAttribute(obj *object, key string, attr pdata.AttributeValue) {
-	if !attr.IsNil() && attr.Type() != pdata.AttributeValueNULL {
+	if attr.Type() != pdata.AttributeValueNULL {
 		obj.Add(key, valueFromAttribute(attr))
 	}
 }

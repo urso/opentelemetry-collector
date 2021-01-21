@@ -61,29 +61,12 @@ func (e *elasticsearchExporter) pushLogsData(ctx context.Context, ld pdata.Logs)
 	rls := ld.ResourceLogs()
 	for i := 0; i < rls.Len(); i++ {
 		rl := rls.At(i)
-		if rl.IsNil() {
-			e.logger.Debug("Dropping nil resource")
-			dropped++
-			continue
-		}
-
 		iils := rl.InstrumentationLibraryLogs()
 		for j := 0; j < iils.Len(); j++ {
 			ils := iils.At(i)
-			if ils.IsNil() {
-				e.logger.Debug("Dropping nil instrumentation logs list.")
-				dropped++
-				continue
-			}
-
 			logs := ils.Logs()
 			for k := 0; k < logs.Len(); k++ {
 				lr := logs.At(k)
-				if lr.IsNil() {
-					e.logger.Debug("Dropping nil instrumentation log.")
-					dropped++
-					continue
-				}
 
 				var event []byte
 				event, err := encodeLogEvent(lr, e.mapping)
@@ -111,7 +94,7 @@ func (e *elasticsearchExporter) enqueueEvent(ctx context.Context, attempts int, 
 		Body:   bytes.NewReader(event),
 		OnFailure: func(ctx context.Context, item esutil.BulkIndexerItem, resp esutil.BulkIndexerResponseItem, err error) {
 			switch {
-			case attempts < e.maxRetries && shouldRetryRequest(resp.Status):
+			case e.maxRetries < 0 || attempts < e.maxRetries && shouldRetryRequest(resp.Status):
 				// TODO: debug log
 				e.logger.Debug("Retrying to index event", zap.Int("attempt", attempts), zap.Int("status", resp.Status))
 				e.enqueueEvent(ctx, attempts+1, event)

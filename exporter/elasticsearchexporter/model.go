@@ -251,7 +251,7 @@ func appendAttributeFields(fields []field, path string, am pdata.AttributeMap) [
 }
 
 func appendAttributeValue(fields []field, path string, key string, attr pdata.AttributeValue) []field {
-	if attr.IsNil() {
+	if attr.Type() == pdata.AttributeValueNULL {
 		return fields
 	}
 
